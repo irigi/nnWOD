@@ -6,18 +6,26 @@ class Attributes(object):
     """
     Class holding the attributes of a character
     """
-    def __init__(self, Int=2, Wit=2, Com=2, Str=2, Dex=2, Sta=2, Man=2, Pre=2, Res=2):
-        self.__int = Int
-        self.__wit = Wit
-        self.__com = Com
+    def __init__(self, Int=1, Wit=1, Com=1, Str=1, Dex=1, Sta=1, Man=1, Pre=1, Res=1):
+        self.attr = {}
+        self.attr['int'] = Int
+        self.attr['wit'] = Wit
+        self.attr['com'] = Com
 
-        self.__str = Str
-        self.__dex = Dex
-        self.__sta = Sta
+        self.attr['str'] = Str
+        self.attr['dex'] = Dex
+        self.attr['sta'] = Sta
 
-        self.__man = Man
-        self.__pre = Pre
-        self.__res = Res
+        self.attr['man'] = Man
+        self.attr['pre'] = Pre
+        self.attr['res'] = Res
+
+        self.list = {}
+        self.list['physical'] = ['str', 'dex', 'sta']
+
+        self.list['psychical'] = ['int', 'wit', 'com']
+
+        self.list['social'] = ['man', 'pre', 'res']
 
     def missing(self):
         '''
@@ -25,9 +33,9 @@ class Attributes(object):
         in order of maxima, middle and minimal category
         '''
 
-        physical = self.Str() + self.Dex() + self.Sta()
-        psychical = self.Int() + self.Wit() + self.Res()
-        social = self.Pre() + self.Man() + self.Com()
+        physical = self.get_sum_physical()
+        psychical = self.get_sum_psychical()
+        social = self.get_sum_social()
 
         maximum = max(physical, psychical, social)
         minimum = min(physical, psychical, social)
@@ -35,32 +43,58 @@ class Attributes(object):
 
         return maximum - 5 - 3, middle - 4 - 3, minimum - 3 - 3
 
-    def Str(self):
-        return self.__str
+    def finish(self):
+        for key in self.list:
+            while self.get_sum(name=key) < 3+3:
+                sk = np.random.choice(self.list[key])
+                self.attr[sk] = self.attr[sk] + 1
 
-    def Int(self):
-        return self.__int
 
-    def Dex(self):
-        return self.__dex
+        rem = []
+        for key in self.list:
+            if self.get_sum(key) == 3+3:
+                rem.append(key)
+            else:
+                print(key, self.get_sum(key))
 
-    def Sta(self):
-        return self.__sta
+        selected = np.random.choice(rem)
 
-    def Wit(self):
-        return self.__wit
+        remaining = [key for key in self.list]
+        remaining.remove(selected)
 
-    def Res(self):
-        return self.__res
+        for key in remaining:
+            while self.get_sum(name=key) < 4+3:
+                sk = np.random.choice(self.list[key])
+                self.attr[sk] = self.attr[sk] + 1
 
-    def Com(self):
-        return self.__com
 
-    def Pre(self):
-        return self.__pre
+        rem = []
+        for key in remaining:
+            if self.get_sum(key) == 4+3:
+                rem.append(key)
 
-    def Man(self):
-        return self.__man
+        selected = np.random.choice(rem)
+        remaining.remove(selected)
+
+        for key in remaining:
+            while self.get_sum(name=key) < 5+3:
+                sk = np.random.choice(self.list[key])
+                self.attr[sk] = self.attr[sk] + 1
+
+    def get_sum(self, name):
+        return sum([self.attr[key] for key in self.list[name]])
+
+    def get_sum_psychical(self):
+        return self.get_sum('psychical')
+
+    def get_sum_physical(self):
+        return self.get_sum('physical')
+
+    def get_sum_social(self):
+        return self.get_sum('social')
+
+    def attribute(self, attribute):
+        return self.attr[attribute]
 
 
 if __name__ == "__main__":
@@ -68,8 +102,9 @@ if __name__ == "__main__":
     att = Attributes()
 
     print (att.missing())
-    print (att.Man())
+    att.finish()
+    print (att.missing())
 
-    print(att.Str(), att.Dex(), att.Sta())
-    print(att.Int(), att.Wit(), att.Res())
-    print(att.Pre(), att.Man(), att.Com())
+    print(att.attribute('str'), att.attribute('dex'), att.attribute('sta'))
+    print(att.attribute('int'), att.attribute('wit'), att.attribute('res'))
+    print(att.attribute('pre'), att.attribute('man'), att.attribute('com'))
